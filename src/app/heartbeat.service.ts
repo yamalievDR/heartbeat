@@ -12,6 +12,7 @@ import {
 } from 'rxjs/operators';
 import { randomize } from './utils/randomize';
 import { roundNumber } from './utils/round-number';
+import { average } from './utils/average';
 export const ONE_MINUTE = 60 * 1000;
 
 @Injectable({ providedIn: 'root' })
@@ -56,11 +57,7 @@ export class HeartBeatService {
     );
 
     return rrIntervals$.pipe(
-      map(arr => {
-        const sum: number = arr.reduce((acc, value) => acc + value, 0);
-        const avg = sum / arr.length;
-        return roundNumber(avg, 3);
-      }),
+      map(arr => roundNumber(average(arr), 3)),
       map(rr => roundNumber(ONE_MINUTE / rr)),
       auditTime(1000)
     );
