@@ -1,5 +1,15 @@
-<button (click)="running = !running">
-  {{ running ? 'Остановить' : 'Измерить' }}
-</button>
+<div class="centered-container">
+  <div
+    class="heart"
+    [@running]="{
+      value: running,
+      params: { animateTime: animateTime$ | async }
+    }"
+  >
+    <span *ngIf="running && (bpm$ | async) as bpm">{{ bpm }}</span>
+  </div>
 
-<pre>{{ bpm$ | async | json }}</pre>
+  <button (click)="running = !running">
+    {{ running ? 'Остановить' : 'Измерить' }}
+  </button>
+</div>

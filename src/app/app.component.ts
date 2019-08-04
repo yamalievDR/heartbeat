@@ -1,4 +1,11 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostBinding } from '@angular/core';
+import {
+  trigger,
+  state,
+  style,
+  animate,
+  transition
+} from '@angular/animations';
 import { Observable, Subject } from 'rxjs';
 import { HeartBeatService } from './heartbeat.service';
 import { filter, takeUntil } from 'rxjs/operators';
@@ -6,33 +13,39 @@ import { filter, takeUntil } from 'rxjs/operators';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  styleUrls: ['./app.component.scss'],
+  animations: [
+    trigger('running', [
+      state(
+        'true',
+        style({
+          animation: 'pulse {{animateTime}}ms infinite'
+        }),
+        { params: { animateTime: 1000 } }
+      ),
+      state(
+        'false',
+        style({
+          animation: 'none'
+        })
+      )
+    ])
+  ]
 })
-export class AppComponent implements OnInit, OnDestroy {
+export class AppComponent implements OnInit {
   running = false;
-
-  pulse = false; // TODO: animation
-
+  animateTime$: Observable<number>;
   bpm$: Observable<any>;
-  private destroy$ = new Subject<void>();
 
   constructor(private heartBeatService: HeartBeatService) {}
 
   ngOnInit(): void {
     this.bpm$ = this.heartBeatService.getBPM().pipe(filter(() => this.running));
-
-    this.heartBeatService
-      .getRRS()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => (this.pulse = !this.pulse));
+    this.animateTime$ = this.heartBeatService.getFrequency();
+    this.setFrequency(1000);
   }
 
   setFrequency(val: number) {
     this.heartBeatService.setFrequency(val);
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }
